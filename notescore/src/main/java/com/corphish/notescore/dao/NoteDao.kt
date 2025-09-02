@@ -13,7 +13,7 @@ interface NoteDao {
     suspend fun insert(note: Note)
 
     @Query("SELECT * FROM notes WHERE userId = :userId ORDER BY creationTime DESC")
-    suspend fun getAllNotesCreatedByUser(userId: Int): Flow<List<Note>>
+    fun getAllNotesCreatedByUser(userId: Int): Flow<List<Note>>
 
     @Query("SELECT * FROM notes WHERE userId = :userId AND creationTime <= :createdBefore ORDER BY creationTime LIMIT :count")
     suspend fun getNotesCreatedByUserCreatedBefore(userId: Int, createdBefore: Long, count: Int = 10): List<Note>

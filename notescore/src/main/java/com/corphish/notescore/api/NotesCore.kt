@@ -1,8 +1,10 @@
 package com.corphish.notescore.api
 
 import android.content.Context
+import com.corphish.notescore.api.functions.NoteFunctions
 import com.corphish.notescore.api.functions.UserFunctions
 import com.corphish.notescore.db.NotesDatabase
+import com.corphish.notescore.models.User
 
 /**
  * Object that provides all the functions to its clients.
@@ -23,4 +25,11 @@ object NotesCore {
     fun userFunctions() = UserFunctions(checkNotNull(database) {
         "Please call NotesCore#init method first"
     }.userDao())
+
+    fun noteFunctions(user: User) = NoteFunctions(
+        user = user,
+        noteDao = checkNotNull(database) {
+            "Please call NotesCore#init method first"
+        }.noteDao()
+    )
 }

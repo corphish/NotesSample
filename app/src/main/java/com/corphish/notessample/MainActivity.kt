@@ -1,8 +1,10 @@
 package com.corphish.notessample
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -34,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.corphish.notescore.api.NotesCore
 import com.corphish.notescore.api.functions.UserFunctions
+import com.corphish.notescore.models.User
 import com.corphish.notessample.ui.theme.NotesSampleTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,11 +67,18 @@ class MainActivity : ComponentActivity() {
 fun EntryPoint(userFunctions: UserFunctions, modifier: Modifier) {
     // 0 - Login, 1 - Register
     var mode by remember { mutableIntStateOf(0) }
+    val activity = LocalActivity.current
 
     when (mode) {
         0 -> Login(
             userFunctions = userFunctions,
             modifier = modifier,
+            onLoginSuccess = {
+                val intent = Intent(activity, NotesActivity::class.java)
+                intent.putExtra(NotesActivity.KEY_USER, it)
+                activity?.startActivity(intent)
+                activity?.finish()
+            },
             onRegisterClicked = { mode = 1 }
         )
 
@@ -82,7 +94,7 @@ fun EntryPoint(userFunctions: UserFunctions, modifier: Modifier) {
 fun Register(
     userFunctions: UserFunctions,
     modifier: Modifier,
-    onLoginClicked: () -> Unit = {  }
+    onLoginClicked: () -> Unit = { }
 ) {
     var username by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
@@ -91,7 +103,9 @@ fun Register(
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = modifier.fillMaxSize().padding(32.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp)
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
@@ -129,7 +143,10 @@ fun Register(
                 scope.launch(Dispatchers.IO) {
                     val user = userFunctions.registerUser(username, displayName, password)
                     isError = user == null
-                    Log.i("Main", if (user == null) "User registration failed" else "User registration successful: $user")
+                    Log.i(
+                        "Main",
+                        if (user == null) "User registration failed" else "User registration successful: $user"
+                    )
 
                     if (!isError) {
                         onLoginClicked()
@@ -143,7 +160,7 @@ fun Register(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
+        OutlinedButton(
             onClick = onLoginClicked,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -156,7 +173,8 @@ fun Register(
 fun Login(
     userFunctions: UserFunctions,
     modifier: Modifier,
-    onRegisterClicked: () -> Unit = {  }
+    onLoginSuccess: (User) -> Unit = { },
+    onRegisterClicked: () -> Unit = { }
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -164,7 +182,9 @@ fun Login(
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = modifier.fillMaxSize().padding(32.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp)
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
@@ -196,7 +216,14 @@ fun Login(
                 scope.launch(Dispatchers.IO) {
                     val user = userFunctions.authenticateUser(username, password)
                     isError = user == null
-                    Log.i("Main", if (user == null) "User authentication failed" else "User authentication successful: $user")
+                    Log.i(
+                        "Main",
+                        if (user == null) "User authentication failed" else "User authentication successful: $user"
+                    )
+
+                    if (user != null) {
+                        onLoginSuccess(user)
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -206,7 +233,7 @@ fun Login(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
+        OutlinedButton(
             onClick = onRegisterClicked,
             modifier = Modifier.fillMaxWidth()
         ) {

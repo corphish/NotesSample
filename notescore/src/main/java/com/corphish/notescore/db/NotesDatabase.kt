@@ -12,7 +12,7 @@ import com.corphish.notescore.models.User
 /**
  * Consolidated database for notes and users capabilities.
  */
-@Database(entities = [User::class, Note::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, Note::class], version = 2, exportSchema = false)
 abstract class NotesDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun noteDao(): NoteDao
@@ -27,7 +27,8 @@ abstract class NotesDatabase : RoomDatabase() {
                     context.applicationContext,
                     NotesDatabase::class.java,
                     "notes_database"
-                ).build().also { INSTANCE = it }
+                ).fallbackToDestructiveMigration()
+                    .build().also { INSTANCE = it }
             }
         }
     }

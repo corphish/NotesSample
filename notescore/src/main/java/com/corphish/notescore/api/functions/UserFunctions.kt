@@ -50,6 +50,9 @@ class UserFunctions(
      * Authenticates an user with given username and password.
      * Returns null if authentication is failed, user object otherwise
      * for the given credentials.
+     *
+     * This user object returned by this (if not null) can then be used to login the user
+     * to create a local persistent session and complete the flow.
      */
     suspend fun authenticateUser(
         username: String,

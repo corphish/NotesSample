@@ -14,7 +14,7 @@ import com.corphish.notescore.models.User
 /**
  * Consolidated database for notes and users capabilities.
  */
-@Database(entities = [User::class, Note::class, Session::class], version = 2, exportSchema = false)
+@Database(entities = [User::class, Note::class, Session::class], version = 3, exportSchema = false)
 abstract class NotesDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun noteDao(): NoteDao

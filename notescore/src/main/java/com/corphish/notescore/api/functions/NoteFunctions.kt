@@ -43,6 +43,22 @@ class NoteFunctions(
     }
 
     /**
+     * Function to update an existing note.
+     * Pass the old note and new summary and details.
+     */
+    suspend fun updateNote(oldNote: Note, newSummary: String, newDetails: String): Note {
+        val note = Note(
+            id = oldNote.id,
+            userId = oldNote.userId,
+            summary = newSummary,
+            details = newDetails
+        )
+
+        noteDao.updateNote(note)
+        return note
+    }
+
+    /**
      * Returns all the notes created by the user.
      */
     fun getAllNotes(): Flow<List<Note>> = noteDao.getAllNotesCreatedByUser(userId = user.id)

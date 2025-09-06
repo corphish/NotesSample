@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.corphish.notescore.api.NotesCore
 import com.corphish.notescore.api.functions.UserFunctions
 import com.corphish.notescore.models.User
@@ -55,6 +58,12 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     EntryPoint(
                         userFunctions = userFunctions,
+                        onUserAvailableToProceed = {
+                            val intent = Intent(this, NotesActivity::class.java)
+                            intent.putExtra(NotesActivity.KEY_USER, it)
+                            startActivity(intent)
+                            finish()
+                        },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -64,21 +73,37 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun EntryPoint(userFunctions: UserFunctions, modifier: Modifier) {
-    // 0 - Login, 1 - Register
-    var mode by remember { mutableIntStateOf(0) }
-    val activity = LocalActivity.current
+fun EntryPoint(
+    userFunctions: UserFunctions,
+    onUserAvailableToProceed: (User) -> Unit = {  },
+    modifier: Modifier
+) {
+    // 0 - Login, 1 - Register, -1 - Checking for session
+    var mode by remember { mutableIntStateOf(-1) }
+    val scope = rememberCoroutineScope()
+
+    // Check for currently logged in user
+    LaunchedEffect(Unit) {
+        scope.launch {
+            val currentlyLoggedInUser = userFunctions.getCurrentlyLoggedInUser()
+            if (currentlyLoggedInUser != null) {
+                onUserAvailableToProceed(currentlyLoggedInUser)
+            } else {
+                mode = 0
+            }
+        }
+    }
 
     when (mode) {
+        -1 -> {
+            Box(modifier = modifier.fillMaxSize()) {
+                CircularProgressIndicator()
+            }
+        }
         0 -> Login(
             userFunctions = userFunctions,
             modifier = modifier,
-            onLoginSuccess = {
-                val intent = Intent(activity, NotesActivity::class.java)
-                intent.putExtra(NotesActivity.KEY_USER, it)
-                activity?.startActivity(intent)
-                activity?.finish()
-            },
+            onLoginSuccess = onUserAvailableToProceed,
             onRegisterClicked = { mode = 1 }
         )
 
@@ -222,6 +247,7 @@ fun Login(
                     )
 
                     if (user != null) {
+                        userFunctions.loginUser(user)
                         onLoginSuccess(user)
                     }
                 }

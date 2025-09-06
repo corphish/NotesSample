@@ -6,6 +6,7 @@ import com.corphish.notescore.dao.SessionDao
 import com.corphish.notescore.dao.UserDao
 import com.corphish.notescore.models.Session
 import com.corphish.notescore.models.User
+import com.corphish.notescore.utils.DisplayNameValidator
 import com.corphish.notescore.utils.PasswordHasher
 
 /**
@@ -32,7 +33,7 @@ class UserFunctions(
 
         val user = User(
             username = username,
-            displayName = displayName,
+            displayName = DisplayNameValidator.validateDisplayName(displayName),
             passwordHash = passwordHash,
             salt = salt
         )
@@ -51,7 +52,7 @@ class UserFunctions(
      * Returns null if authentication is failed, user object otherwise
      * for the given credentials.
      *
-     * This user object returned by this (if not null) can then be used to login the user
+     * The user object returned by this (if not null) can then be used to login the user
      * to create a local persistent session and complete the flow.
      */
     suspend fun authenticateUser(

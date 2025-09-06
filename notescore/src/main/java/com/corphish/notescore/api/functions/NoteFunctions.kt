@@ -45,7 +45,7 @@ class NoteFunctions(
     /**
      * Returns all the notes created by the user.
      */
-    suspend fun getAllNotes(): Flow<List<Note>> = noteDao.getAllNotesCreatedByUser(userId = user.id)
+    fun getAllNotes(): Flow<List<Note>> = noteDao.getAllNotesCreatedByUser(userId = user.id)
 
     /**
      * Returns `count` number of notes created by the user on or before `createdBefore`

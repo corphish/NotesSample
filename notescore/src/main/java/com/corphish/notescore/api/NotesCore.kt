@@ -22,9 +22,14 @@ object NotesCore {
         }
     }
 
-    fun userFunctions() = UserFunctions(checkNotNull(database) {
-        "Please call NotesCore#init method first"
-    }.userDao())
+    fun userFunctions() = UserFunctions(
+        userDao = checkNotNull(database) {
+            "Please call NotesCore#init method first"
+        }.userDao(),
+        sessionDao = checkNotNull(database) {
+            "Please call NotesCore#init method first"
+        }.sessionDao()
+    )
 
     fun noteFunctions(user: User) = NoteFunctions(
         user = user,

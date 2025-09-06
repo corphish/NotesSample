@@ -1,9 +1,12 @@
 package com.corphish.notescore.models
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity(
     tableName = "notes",
     foreignKeys = [ForeignKey(
@@ -23,4 +26,4 @@ data class Note(
     val details: String,
 
     val creationTime: Long = System.currentTimeMillis()
-)
+) : Parcelable
